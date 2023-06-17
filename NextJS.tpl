@@ -19,6 +19,10 @@ server {
        proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
     }
 
+    location ~ /\.(?!well-known\/|file) {
+        deny all;
+        return 404;
+    }
 
     location ~ /\.ht    {return 404;}
     location ~ /\.svn/  {return 404;}

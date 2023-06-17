@@ -7,7 +7,6 @@ server {
     listen %ip%:%proxy_ssl_port% ssl;
     http2 on;
     server_name %domain_idn%;
-    #ssl on;
     ssl_certificate      %ssl_pem%;
     ssl_certificate_key  %ssl_key%;
     error_log  /var/log/%web_system%/domains/%domain%.error.log error;
@@ -31,6 +30,11 @@ server {
 
     location @fallback {
         proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
+    }
+
+    location ~ /\.(?!well-known\/|file) {
+       deny all;
+       return 404;
     }
 
     location ~ /\.ht    {return 404;}
