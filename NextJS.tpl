@@ -9,13 +9,6 @@ server {
 
     location / {
         proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:$request_uri;
-        location ~* ^.+\.(%proxy_extentions%)$ {
-            root           %docroot%;
-            access_log     /var/log/%web_system%/domains/%domain%.log combined;
-            access_log     /var/log/%web_system%/domains/%domain%.bytes bytes;
-            expires        max;
-            try_files      $uri @fallback;
-        }
     }
 
     location /error/ {
@@ -23,10 +16,13 @@ server {
     }
 
     location @fallback {
-       #proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$1;
        proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
     }
 
+    location ~ /\.(?!well-known\/|file) {
+        deny all;
+        return 404;
+    }
 
     location ~ /\.ht    {return 404;}
     location ~ /\.svn/  {return 404;}
