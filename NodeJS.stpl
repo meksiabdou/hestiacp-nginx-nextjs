@@ -16,8 +16,16 @@ server {
     gzip_types    image/svg+xml svg svgz text/plain application/x-javascript text/xml text/css;
     gzip_vary on;
 
+    # ✅ Serve Let's Encrypt challenge directly
+    location ^~/.well-known/acme-challenge/ {
+        alias %home%/%user%/web/%domain%/public_html/.well-known/acme-challenge/;
+        default_type "text/plain";
+        try_files $uri=404;
+        allow all;
+    }
+
     location / {
-        proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:$request_uri;
+        proxy_pass       http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:$request_uri;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
@@ -29,12 +37,7 @@ server {
     }
 
     location @fallback {
-        proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
-    }
-
-    location ~ /\.(?!well-known\/|file) {
-       deny all;
-       return 404;
+        proxy_pass http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
     }
 
     location ~ /\.ht    {return 404;}

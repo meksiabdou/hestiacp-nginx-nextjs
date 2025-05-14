@@ -3,25 +3,28 @@ server {
     server_name %domain_idn% %alias_idn%;
     error_log  /var/log/%web_system%/domains/%domain%.error.log error;
 
+    # ✅ Serve Let's Encrypt challenge directly
+    location ^~/.well-known/acme-challenge/ {
+        alias %home%/%user%/web/%domain%/public_html/.well-known/acme-challenge/;
+        default_type "text/plain";
+        try_files $uri=404;
+        allow all;
+    }
+
     location /_next/static {
         proxy_pass http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock;
     }
 
     location / {
-        proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:$request_uri;
+        proxy_pass http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:$request_uri;
     }
 
     location /error/ {
-        alias   %home%/%user%/web/%domain%/document_errors/;
+        alias %home%/%user%/web/%domain%/document_errors/;
     }
 
     location @fallback {
-       proxy_pass      http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
-    }
-
-    location ~ /\.(?!well-known\/|file) {
-        deny all;
-        return 404;
+       proxy_pass http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
     }
 
     location ~ /\.ht    {return 404;}
