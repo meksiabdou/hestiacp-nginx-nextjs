@@ -6,11 +6,9 @@ server {
     include %home%/%user%/conf/web/%domain%/nginx.forcessl.conf*;
 
     # ✅ Serve Let's Encrypt challenge directly
-    location ^~/.well-known/acme-challenge/ {
-        alias %home%/%user%/web/%domain%/public_html/.well-known/acme-challenge/;
-        default_type "text/plain";
-        try_files $uri=404;
-        allow all;
+    location ~ /\.(?!well-known\/|file) {
+            deny all;
+            return 404;
     }
 
     location / {
