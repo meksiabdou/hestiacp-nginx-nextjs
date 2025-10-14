@@ -1,15 +1,9 @@
 server {
     listen %ip%:%proxy_ssl_port% ssl;
-    http2 on;
-    server_name %domain_idn%;
+    server_name %domain_idn% %alias_idn%;
     ssl_certificate      %ssl_pem%;
     ssl_certificate_key  %ssl_key%;
     error_log  /var/log/%web_system%/domains/%domain%.error.log error;
-    gzip on;
-    gzip_min_length  1100;
-    gzip_buffers  4 32k;
-    gzip_types    image/svg+xml svg svgz text/plain application/x-javascript text/xml text/css;
-    gzip_vary on;
 
     # ✅ Serve Let's Encrypt challenge directly
     location ^~/.well-known/acme-challenge/ {
@@ -32,7 +26,9 @@ server {
     }
 
     location @fallback {
-        proxy_pass http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $host;
+        proxy_pass   http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:$request_uri;
     }
 
     location ~ /\.ht    {return 404;}

@@ -20,7 +20,9 @@ server {
     }
 
     location @fallback {
-        proxy_pass http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:/$request_uri;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $host;
+        proxy_pass   http://unix:%home%/%user%/web/%domain%/nodeapp/app.sock:$request_uri;
     }
 
     location ~ /\.ht    {return 404;}
